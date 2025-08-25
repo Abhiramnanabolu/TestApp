@@ -1,0 +1,82 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String      @id @default(uuid())
+  email             String      @unique
+  name              String?
+  image             String?  
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  testsCreated      Test[]
+}
+
+model Test {
+  id                  String              @id @default(uuid())
+  title               String
+  description         String?
+  createdBy           String
+  creator             User                @relation(fields: [createdBy], references: [id])
+  availabilityStart   DateTime
+  availabilityEnd     DateTime
+  totalDuration       Int   
+
+  shuffleQuestions    Boolean             @default(false)
+  allowSectionNav     Boolean             @default(true)
+  negativeMarking     Boolean             @default(false)
+  showResultsInstant  Boolean             @default(true)
+
+  status              String              @default("draft") // "draft", "published"
+  sections            Section[]
+  invitations         TestInvitation[]
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+}
+
+model Section {
+  id        String   @id @default(uuid())
+  title     String
+  duration  Int? // optional section-wise time
+  testId    String
+  test      Test @relation(fields: [testId], references: [id])
+  questions Question[]
+}
+
+model Question {
+  id          String   @id @default(uuid())
+  type        String   // "mcq", "text", "multi-select"
+  text        String
+  options     Option[]
+  sectionId   String
+  section     Section @relation(fields: [sectionId], references: [id])
+}
+
+model Option {
+  id          String   @id @default(uuid())
+  text        String
+  isCorrect   Boolean
+  questionId  String
+  question    Question @relation(fields: [questionId], references: [id])
+}
+
+model TestInvitation {
+  id        String   @id @default(uuid())
+  email     String
+  testId    String
+  test      Test @relation(fields: [testId], references: [id])
+  status    String   @default("pending") // "pending", "accepted", "completed"
+}
