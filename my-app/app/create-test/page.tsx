@@ -237,7 +237,9 @@ export default function CreateTest() {
                   variant="outline"
                   onClick={resetForm}
                   className="border-gray-200 text-gray-700 hover:bg-gray-50 bg-transparent"
-                />
+                >
+                  Reset Form
+                </Button>
               </div>
             </form>
           </CardContent>

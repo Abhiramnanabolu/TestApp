@@ -48,21 +48,26 @@ model Test {
 }
 
 model Section {
-  id        String   @id @default(uuid())
-  title     String
-  duration  Int? // optional section-wise time
-  testId    String
-  test      Test @relation(fields: [testId], references: [id])
-  questions Question[]
+  id                String   @id @default(uuid())
+  title             String
+  duration          Int? // optional section-wise time
+  defaultPositiveMarks Float?   @default(1.0) // default positive marks for questions in this section
+  defaultNegativeMarks Float?   @default(0.0) // default negative marks for questions in this section
+  testId            String
+  test              Test @relation(fields: [testId], references: [id])
+  questions         Question[]
 }
 
 model Question {
-  id          String   @id @default(uuid())
-  type        String   // "mcq", "text", "multi-select"
-  text        String
-  options     Option[]
-  sectionId   String
-  section     Section @relation(fields: [sectionId], references: [id])
+  id            String   @id @default(uuid())
+  type          String   // "mcq", "text", "multi-select"
+  text          String
+  correctAnswer String?  // for text-type questions, stores the expected answer
+  positiveMarks Float?   // positive marks for this question, falls back to section default if null
+  negativeMarks Float?   // negative marks for this question, falls back to section default if null
+  options       Option[]
+  sectionId     String
+  section       Section @relation(fields: [sectionId], references: [id])
 }
 
 model Option {
