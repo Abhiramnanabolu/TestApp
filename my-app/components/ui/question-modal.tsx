@@ -63,12 +63,12 @@ export function QuestionModal({
     negativeMarks: null
   })
 
-  const [previewMode, setPreviewMode] = useState(false)
+  const [previewMode, setPreviewMode] = useState(true)
 
   // Reset modal state when opening
   useEffect(() => {
     if (isOpen) {
-      setPreviewMode(false)
+      setPreviewMode(true)
     }
   }, [isOpen])
 

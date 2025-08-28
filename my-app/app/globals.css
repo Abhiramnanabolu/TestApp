@@ -2,6 +2,51 @@
 @import "tw-animate-css";
 @import "katex/dist/katex.min.css";
 
+/* Math equation styling */
+.math-inline {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 2px;
+}
+
+.math-display {
+  display: block;
+  text-align: center;
+  margin: 1em 0;
+}
+
+/* Ensure math renders properly in the editor */
+.ProseMirror .math-inline {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 2px;
+}
+
+/* TipTap Mathematics extension styling */
+.ProseMirror .katex {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.ProseMirror .katex-display {
+  display: block;
+  text-align: center;
+  margin: 1em 0;
+}
+
+/* Math node styling in editor */
+.ProseMirror .math-node {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 2px;
+}
+
+/* Ensure math decorations render properly */
+.ProseMirror .math-render {
+  display: inline-block;
+  vertical-align: middle;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -148,7 +193,8 @@
   margin: 0.25rem 0;
 }
 
-.ProseMirror img {
+.ProseMirror img,
+.prose img {
   max-width: 100%;
   height: auto;
   border-radius: 0.5rem;
@@ -167,4 +213,13 @@
 
 .katex-display {
   margin: 1rem 0;
+}
+
+/* Prose image styles for preview */
+.prose img {
+  display: block;
+}
+
+.prose p img {
+  margin: 0.5rem 0;
 }

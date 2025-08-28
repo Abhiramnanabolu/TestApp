@@ -18,10 +18,10 @@ import {
   List, 
   ListOrdered, 
   Image as ImageIcon,
-  Type,
-  X
+  Type
 } from 'lucide-react'
 import React, { useCallback, useRef, useState } from 'react'
+import { MathEditorModal } from './math-editor'
 
 interface RichTextEditorProps {
   content: string
@@ -33,7 +33,6 @@ interface RichTextEditorProps {
 export function RichTextEditor({ content, onChange, placeholder, className }: RichTextEditorProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [showMathModal, setShowMathModal] = useState(false)
-  const [mathHtml, setMathHtml] = useState('')
 
   const editor = useEditor({
     extensions: [
@@ -53,6 +52,8 @@ export function RichTextEditor({ content, onChange, placeholder, className }: Ri
       }),
       ListItem,
       Image.configure({
+        // Ensure images with data URIs from saved content render in the editor
+        allowBase64: true,
         HTMLAttributes: {
           class: 'max-w-full h-auto rounded-lg',
         },
@@ -60,10 +61,13 @@ export function RichTextEditor({ content, onChange, placeholder, className }: Ri
       Mathematics.configure({
         katexOptions: {
           throwOnError: false,
+          output: 'htmlAndMathml',
+          displayMode: false,
         },
       }),
     ],
     content,
+    // Avoid SSR hydration mismatches per Tiptap guidance
     immediatelyRender: false,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML())
@@ -72,11 +76,19 @@ export function RichTextEditor({ content, onChange, placeholder, className }: Ri
       attributes: {
         class: 'prose prose-sm focus:outline-none min-h-[80px] p-2 text-sm leading-relaxed',
       },
+      handleDOMEvents: {
+        // Force math re-rendering on focus/blur
+        focus: (view) => {
+          setTimeout(() => view.updateState(view.state), 0)
+          return false
+        },
+      },
     },
   })
 
   const handleImageUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
+    const inputEl = event.currentTarget
+    const file = inputEl.files?.[0]
     if (!file) return
 
     // Check if file is an image
@@ -97,6 +109,8 @@ export function RichTextEditor({ content, onChange, placeholder, className }: Ri
       if (editor) {
         editor.chain().focus().setImage({ src: base64 }).run()
       }
+      // reset the input so selecting the same file again triggers onChange
+      inputEl.value = ''
     }
     reader.readAsDataURL(file)
   }, [editor])
@@ -140,17 +154,16 @@ export function RichTextEditor({ content, onChange, placeholder, className }: Ri
     setShowMathModal(true)
   }
 
-  const handleMathSubmit = () => {
-    if (mathHtml.trim() && editor) {
-      editor.chain().focus().insertContent(mathHtml).run()
-      setMathHtml('')
-      setShowMathModal(false)
-    }
-  }
+  const handleMathInsert = (latex: string) => {
+    if (!editor) return
+    const trimmedLatex = (latex || '').trim()
+    if (!trimmedLatex) return
 
-  const handleMathCancel = () => {
-    setMathHtml('')
-    setShowMathModal(false)
+    // Use the Mathematics extension command to insert an inline math node
+    ;(editor.chain() as any)
+      .focus()
+      .insertInlineMath({ latex: trimmedLatex })
+      .run()
   }
 
   if (!editor) {
@@ -252,55 +265,11 @@ export function RichTextEditor({ content, onChange, placeholder, className }: Ri
       />
 
       {/* Math Modal */}
-      {showMathModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Insert Math Equation</h3>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={handleMathCancel}
-                className="p-1 h-8 w-8"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            
-            <div className="mb-4">
-              <label htmlFor="math-input" className="block text-sm font-medium text-gray-700 mb-2">
-                Enter HTML for math equation:
-              </label>
-              <textarea
-                id="math-input"
-                value={mathHtml}
-                onChange={(e) => setMathHtml(e.target.value)}
-                placeholder="e.g., <math><mfrac><mi>a</mi><mi>b</mi></mfrac></math>"
-                className="w-full h-32 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                autoFocus
-              />
-            </div>
-            
-            <div className="flex justify-end gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleMathCancel}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                onClick={handleMathSubmit}
-                disabled={!mathHtml.trim()}
-              >
-                Insert
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <MathEditorModal
+        isOpen={showMathModal}
+        onClose={() => setShowMathModal(false)}
+        onInsert={handleMathInsert}
+      />
     </div>
   )
 }
