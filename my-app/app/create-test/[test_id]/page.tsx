@@ -616,7 +616,7 @@ export default function TestPage() {
   return (
     <div className="h-screen bg-white flex flex-col">
       {/* Compact Header */}
-      <header className="sticky top-0 z-10 border-b border-gray-200 bg-white">
+      <header className="flex-shrink-0 border-b border-gray-200 bg-white">
         <div className="flex items-center justify-between px-4 py-2">
           <div className="flex items-center gap-2 min-w-0">
             <Button
@@ -640,10 +640,10 @@ export default function TestPage() {
       </header>
 
       {/* Content Area with Sidebar */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 min-h-0">
         {/* Compact Sidebar */}
         <div className="w-64 border-r border-gray-200 bg-gray-50/30 flex flex-col">
-          <div className="p-3 overflow-y-auto">
+          <div className="flex-1 p-3 overflow-y-auto">
             <nav className="space-y-0.5">
               <button
                 onClick={() => setActiveView("details")}
@@ -706,8 +706,8 @@ export default function TestPage() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <main className="flex-1 p-4 overflow-y-auto">
+        <div className="flex-1 flex flex-col min-w-0">
+          <main className="flex-1 p-4 overflow-y-auto min-h-0">
             {activeView === "details" && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">

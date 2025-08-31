@@ -10,6 +10,7 @@ import { Underline } from '@tiptap/extension-underline'
 import { BulletList } from '@tiptap/extension-bullet-list'
 import { OrderedList } from '@tiptap/extension-ordered-list'
 import { ListItem } from '@tiptap/extension-list-item'
+
 import { Button } from './button'
 import { 
   Bold as BoldIcon, 
@@ -36,7 +37,22 @@ export function RichTextEditor({ content, onChange, placeholder, className }: Ri
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        // Configure the paragraph extension to handle line breaks better
+        paragraph: {
+          HTMLAttributes: {
+            class: 'mb-2',
+          },
+        },
+        // Configure hard break to work with Shift+Enter
+        hardBreak: {
+          keepMarks: false,
+          HTMLAttributes: {
+            class: 'hard-break',
+          },
+        },
+
+      }),
       Bold,
       Italic,
       Underline,
@@ -163,6 +179,8 @@ export function RichTextEditor({ content, onChange, placeholder, className }: Ri
     ;(editor.chain() as any)
       .focus()
       .insertInlineMath({ latex: trimmedLatex })
+      // Insert a trailing space and move the caret after the math node
+      .insertContent(' ')
       .run()
   }
 

@@ -164,6 +164,30 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Fix scrollbar issues and ensure proper height constraints */
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
+  
+  /* Custom scrollbar styling for better UX */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+  }
 }
 
 /* Rich Text Editor Styles */
@@ -172,7 +196,8 @@
 }
 
 .ProseMirror p {
-  margin: 0.5rem 0;
+  margin: 0.75rem 0;
+  min-height: 1.5em; /* Ensure empty paragraphs take up space in editor too */
 }
 
 .ProseMirror p:first-child {
@@ -181,6 +206,18 @@
 
 .ProseMirror p:last-child {
   margin-bottom: 0;
+}
+
+/* Ensure empty paragraphs in editor are visible */
+.ProseMirror p:empty {
+  min-height: 1.5em;
+}
+
+/* Add placeholder for completely empty paragraphs in editor */
+.ProseMirror p:empty::before {
+  content: '\00a0'; /* Non-breaking space */
+  opacity: 0;
+  pointer-events: none;
 }
 
 .ProseMirror ul,
@@ -222,4 +259,72 @@
 
 .prose p img {
   margin: 0.5rem 0;
+}
+
+/* Fix paragraph spacing in HtmlContent preview */
+.prose p {
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+  min-height: 1.5em; /* Ensure empty paragraphs take up space */
+  display: block;
+}
+
+.prose p:first-child {
+  margin-top: 0;
+}
+
+.prose p:last-child {
+  margin-bottom: 0;
+}
+
+/* Handle paragraphs with margin-bottom class from editor */
+.prose p.mb-2 {
+  margin-bottom: 0.5rem;
+  min-height: 1.5em; /* Ensure empty paragraphs take up space */
+}
+
+/* Preserve spacing for empty paragraphs (when user presses Enter multiple times) */
+.prose p:empty {
+  min-height: 1.5em;
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Handle empty paragraphs with only whitespace */
+.prose p:empty::before,
+.prose p[data-empty="true"]::before {
+  content: '\00a0'; /* Non-breaking space */
+  opacity: 0;
+}
+
+/* Ensure consecutive empty paragraphs maintain spacing */
+.prose p:empty + p:empty {
+  margin-top: 0.75rem;
+}
+
+
+
+/* Ensure line breaks are properly displayed */
+.prose br {
+  display: block;
+  margin: 0.25rem 0;
+}
+
+/* Style hard breaks from TipTap */
+.prose .hard-break {
+  display: block;
+  margin: 0.25rem 0;
+}
+
+/* Fix list spacing in preview */
+.prose ul,
+.prose ol {
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+  padding-left: 1.5rem;
+}
+
+.prose li {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
 }
